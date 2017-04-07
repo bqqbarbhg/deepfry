@@ -1,0 +1,84 @@
+<html>
+<head>
+<title>Deep fry</title>
+
+<style>
+.imagebox {
+	border: dashed;
+	width: 200px;
+	height: 200px;
+	cursor: pointer;
+	transition: transform 1s ease;
+}
+.imagebox-img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	cursor: pointer;
+}
+.imagebox-fry {
+	transform: translate(0, 200px);
+}
+</style>
+
+</head>
+<body>
+
+<input type="file" id="source" value="Input" />
+<input type="button" id="go" value="Go" />
+
+<div id="imagebox" class="imagebox">
+
+<img id="preview" class='imagebox-img' />
+
+</div>
+
+
+<script src='https://cdn.rawgit.com/naptha/tesseract.js/1.0.10/dist/tesseract.js'></script>
+<script src="ext/jpeg_encoder_basic.js"></script>
+<script src="ext/tracking-min.js"></script>
+<script src="ext/eye-min.js"></script>
+<script src="src/deepfry.js"></script>
+
+<script>
+
+let hSource = document.getElementById('source');
+let hImagebox = document.getElementById('imagebox');
+let hGo = document.getElementById('go');
+let hPreview = document.getElementById('preview');
+
+hImagebox.addEventListener('click', e => {
+	hSource.click();
+});
+
+hSource.addEventListener('change', e => {
+	createImageFromFile(hSource.files[0])
+		.then(image => { hPreview.src = image.src; });
+});
+
+hGo.addEventListener('click', e => {
+
+	hImagebox.classList.add('imagebox-fry');
+
+	let load = new Promise((resolve, reject) => {
+		let img = new Image();
+		img.src = hPreview.src;
+		img.onload = () => resolve(img);
+		img.onerror = reject;
+	});
+
+	delay(1.0)
+		.then(() => load)
+		.then(image => deepFry(image, 10))
+		.then(data => {
+			hPreview.src = data;
+			hImagebox.classList.remove('imagebox-fry');
+		})
+		.catch(console.error);
+
+});
+
+</script>
+
+</body>
+</html>
